@@ -109,8 +109,12 @@ export const updateShopSchema = z
   );
 export type UpdateShopInput = z.input<typeof updateShopSchema>;
 
+/** Max shops per page. Higher than the general cap so the map can draw every pin at once. */
+export const MAX_MAP_SHOPS = 200;
+
 export const publicShopsQuerySchema = paginationQuerySchema
   .extend({
+    pageSize: z.coerce.number().int().min(1).max(MAX_MAP_SHOPS).default(50),
     q: z.string().trim().max(100).optional(),
     product: z.string().trim().max(100).optional(),
     category: z.string().trim().max(100).optional(),

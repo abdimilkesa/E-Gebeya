@@ -61,5 +61,6 @@ export interface Cart {
 }
 
 export interface MergeCartResult extends Cart {
-  rejected: { productId: string; reason: LineIssue }[];
+  /** Guest lines that were not added. `CART_FULL` means the line limit was reached. */
+  rejected: { productId: string; reason: LineIssue | 'CART_FULL' }[];
 }
