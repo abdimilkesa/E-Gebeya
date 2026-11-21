@@ -14,8 +14,9 @@ import { businessRule, notFound } from '../../lib/errors.js';
 import { Decimal, money } from '../../lib/format.js';
 import { prisma, type DbClient } from '../../lib/prisma.js';
 import { canPurchase, isShopPublic } from '../catalog/visibility.js';
+import { availablePaymentMethods } from '../payments/payment-methods.js';
 
-const cartProductSelect = {
+export const cartProductSelect = {
   id: true,
   name: true,
   price: true,
@@ -23,6 +24,7 @@ const cartProductSelect = {
   isAvailable: true,
   status: true,
   images: { select: { url: true }, orderBy: { position: 'asc' }, take: 1 },
+  category: { select: { isActive: true } },
   shop: {
     select: {
       id: true,
@@ -35,7 +37,7 @@ const cartProductSelect = {
   },
 } satisfies Prisma.ProductSelect;
 
-type CartProduct = Prisma.ProductGetPayload<{ select: typeof cartProductSelect }>;
+export type CartProduct = Prisma.ProductGetPayload<{ select: typeof cartProductSelect }>;
 
 interface RawLine {
   id: string;
@@ -43,8 +45,8 @@ interface RawLine {
   product: CartProduct;
 }
 
-/** Why a line cannot be bought right now, or null when it can. */
-function lineIssue(product: CartProduct | undefined, quantity: number): LineIssue | null {
+/** Why a line cannot be bought right now, or null when it can. Checkout applies the same rule. */
+export function lineIssue(product: CartProduct | undefined, quantity: number): LineIssue | null {
   if (!product || product.status !== 'ACTIVE' || !isShopPublic(product.shop)) return 'NOT_FOUND';
   if (!canPurchase(product)) return 'UNAVAILABLE';
   if (quantity > product.stockQuantity) return 'INSUFFICIENT_STOCK';
@@ -304,7 +306,7 @@ export async function previewGuestCart(items: CartLineInput[]): Promise<MergeCar
 
 /**
  * Server-side checkout summary: live prices, live stock and each shop's flat delivery fee
- * (zero for pickup). Phase 1 stops here; orders are created in Phase 2.
+ * (zero for pickup). Placing the order re-checks everything under row locks.
  */
 export async function quoteCheckout(
   userId: string,
@@ -362,5 +364,6 @@ export async function quoteCheckout(
     grandTotal: money(merchandise.add(delivery)),
     canCheckout: lines.length > 0 && issues.length === 0,
     issues,
+    paymentMethods: availablePaymentMethods(),
   };
 }

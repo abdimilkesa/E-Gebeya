@@ -1,7 +1,7 @@
 import type { PublicProduct } from '@marketplace/contracts';
 import { Plus } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { ImageWithFallback } from '../../components/ui/ImageWithFallback';
 import { Skeleton } from '../../components/ui/States';
 import { Spinner } from '../../components/ui/Spinner';
@@ -10,8 +10,11 @@ import { useCart } from '../cart/CartProvider';
 
 export function ProductCard({ product, showShop = true }: { product: PublicProduct; showShop?: boolean }) {
   const { mode, addItem } = useCart();
+  const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
+  const [ordering, setOrdering] = useState(false);
   const canAdd = product.canPurchase && mode !== 'unavailable';
+  const busy = adding || ordering;
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-card transition-shadow hover:shadow-pop">
@@ -35,19 +38,37 @@ export function ProductCard({ product, showShop = true }: { product: PublicProdu
         <div className="mt-auto flex items-center justify-between gap-2 pt-2">
           <p className="text-base font-semibold text-ink-950">{formatMoney(product.price)}</p>
           {canAdd ? (
-            <button
-              type="button"
-              aria-label={`Add ${product.name} to cart`}
-              disabled={adding}
-              onClick={async () => {
-                setAdding(true);
-                await addItem(product.id, 1);
-                setAdding(false);
-              }}
-              className="relative z-20 flex size-9 items-center justify-center rounded-xl bg-ink-950 text-white transition-colors hover:bg-ink-800 disabled:opacity-60"
-            >
-              {adding ? <Spinner className="size-4" /> : <Plus className="size-4" />}
-            </button>
+            <div className="relative z-20 flex items-center gap-1.5">
+              {mode === 'customer' ? (
+                <button
+                  type="button"
+                  aria-label={`Order ${product.name}`}
+                  disabled={busy}
+                  onClick={async () => {
+                    setOrdering(true);
+                    const added = await addItem(product.id, 1);
+                    setOrdering(false);
+                    if (added) navigate('/checkout');
+                  }}
+                  className="flex h-9 items-center rounded-xl bg-accent-400 px-2.5 text-xs font-semibold text-ink-950 transition-colors hover:bg-accent-300 disabled:opacity-60"
+                >
+                  {ordering ? <Spinner className="size-4" /> : 'Order'}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                aria-label={`Add ${product.name} to cart`}
+                disabled={busy}
+                onClick={async () => {
+                  setAdding(true);
+                  await addItem(product.id, 1);
+                  setAdding(false);
+                }}
+                className="flex size-9 items-center justify-center rounded-xl bg-ink-950 text-white transition-colors hover:bg-ink-800 disabled:opacity-60"
+              >
+                {adding ? <Spinner className="size-4" /> : <Plus className="size-4" />}
+              </button>
+            </div>
           ) : null}
         </div>
       </div>

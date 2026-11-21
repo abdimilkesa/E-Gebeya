@@ -17,7 +17,9 @@ export function returnPathFor(user: AuthUser, from: unknown): string {
   }
   if (from.startsWith('/admin')) return user.role === 'SUPER_ADMIN' ? from : home;
   if (from.startsWith('/merchant')) return user.role === 'MERCHANT' ? from : home;
-  if (from.startsWith('/checkout')) return user.role === 'CUSTOMER' ? from : home;
+  if (from.startsWith('/shopper')) return user.role === 'CUSTOMER' ? from : home;
+  const customerOnly = ['/checkout', '/account/orders', '/account/addresses'];
+  if (customerOnly.some((path) => from.startsWith(path))) return user.role === 'CUSTOMER' ? from : home;
   if (from === '/login' || from === '/register') return home;
   return from;
 }

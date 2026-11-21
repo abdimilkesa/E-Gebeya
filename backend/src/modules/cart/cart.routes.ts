@@ -1,6 +1,5 @@
 import {
   addCartItemSchema,
-  checkoutQuoteSchema,
   mergeCartSchema,
   previewCartSchema,
   updateCartItemSchema,
@@ -48,12 +47,4 @@ cartRouter.delete('/items/:itemId', async (req, res) => {
 cartRouter.post('/merge', async (req, res) => {
   const { items } = parseBody(mergeCartSchema, req);
   sendData(res, await cart.mergeGuestCart(authOf(req).userId, items));
-});
-
-export const checkoutRouter = Router();
-checkoutRouter.use(guard('CUSTOMER'));
-
-checkoutRouter.post('/quote', async (req, res) => {
-  const { fulfillmentPreference } = parseBody(checkoutQuoteSchema, req);
-  sendData(res, await cart.quoteCheckout(authOf(req).userId, fulfillmentPreference));
 });

@@ -37,11 +37,16 @@ export const registerLimiter = rateLimit({ ...base, limit: 10 });
 
 export const refreshLimiter = rateLimit({ ...base, limit: 60 });
 
+const perUser: Options['keyGenerator'] = (req) =>
+  req.auth?.userId ?? ipKeyGenerator(req.ip ?? 'unknown');
+
 /** Must run after `authenticate`. */
-export const uploadLimiter = rateLimit({
-  ...base,
-  limit: 10,
-  keyGenerator: (req) => req.auth?.userId ?? ipKeyGenerator(req.ip ?? 'unknown'),
-});
+export const uploadLimiter = rateLimit({ ...base, limit: 10, keyGenerator: perUser });
+
+/** Placing an order reserves stock, so each customer gets a small budget. Runs after `authenticate`. */
+export const checkoutLimiter = rateLimit({ ...base, limit: 10, keyGenerator: perUser });
 
 export const apiLimiter = rateLimit({ ...base, limit: 300 });
+
+/** Shopping assistant. Public, so the limit is per IP (docs/09 §9.5). */
+export const aiChatLimiter = rateLimit({ ...base, limit: 20 });

@@ -7,6 +7,7 @@ import { Card, CardHeader, StatCard } from '../../components/ui/Card';
 import { EmptyState, ErrorState, LoadingState, PageHeader } from '../../components/ui/States';
 import { useAuth } from '../../auth/AuthProvider';
 import { formatDate, formatMoney } from '../../lib/format';
+import { MarketPosition } from './MarketPosition';
 import { useMerchantDashboard } from './queries';
 
 export function DashboardPage() {
@@ -17,7 +18,7 @@ export function DashboardPage() {
     <div>
       <PageHeader
         title={`Welcome, ${user?.fullName.split(' ')[0] ?? 'merchant'}`}
-        description="Your shop and products at a glance."
+        description="Your shop, your stock, and how your prices sit against other shops right now."
         actions={
           <ButtonLink to="/merchant/products/new" icon={<Plus className="size-4" />}>
             Add product
@@ -92,6 +93,10 @@ export function DashboardPage() {
               value={dashboardQuery.data.products.unavailable}
               icon={<EyeOff className="size-4" />}
             />
+          </div>
+
+          <div className="mt-6">
+            <MarketPosition shopIds={dashboardQuery.data.shops.map((shop) => shop.id)} />
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">

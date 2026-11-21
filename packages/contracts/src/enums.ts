@@ -49,6 +49,18 @@ export const MERCHANT_FULFILLMENT_STATUSES = [
 ] as const;
 export type MerchantFulfillmentStatus = (typeof MERCHANT_FULFILLMENT_STATUSES)[number];
 
+/** Status of one payment row (a Chapa attempt or one bank transfer). */
+export const PAYMENT_RECORD_STATUSES = [
+  'PENDING',
+  'PROCESSING',
+  'AWAITING_VERIFICATION',
+  'PAID',
+  'FAILED',
+  'REJECTED',
+  'EXPIRED',
+] as const;
+export type PaymentRecordStatus = (typeof PAYMENT_RECORD_STATUSES)[number];
+
 export const ERROR_CODES = [
   'VALIDATION_ERROR',
   'UNAUTHENTICATED',
@@ -61,6 +73,7 @@ export const ERROR_CODES = [
   'RATE_LIMITED',
   'INTERNAL',
   'SERVICE_UNAVAILABLE',
+  'ASSISTANT_UNAVAILABLE',
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 

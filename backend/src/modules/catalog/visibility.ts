@@ -19,7 +19,14 @@ export function isShopPublic(shop: { status: string; merchant: { status: string 
   return shop.status === 'ACTIVE' && shop.merchant.status === 'ACTIVE';
 }
 
-/** Purchasable now: visible, switched on by the merchant, and in stock. */
-export function canPurchase(product: { isAvailable: boolean; stockQuantity: number }): boolean {
-  return product.isAvailable && product.stockQuantity > 0;
+/**
+ * Purchasable now: visible, switched on by the merchant, in stock, and in an active category.
+ * The view's `in_stock` column applies the same rule.
+ */
+export function canPurchase(product: {
+  isAvailable: boolean;
+  stockQuantity: number;
+  category: { isActive: boolean };
+}): boolean {
+  return product.isAvailable && product.stockQuantity > 0 && product.category.isActive;
 }

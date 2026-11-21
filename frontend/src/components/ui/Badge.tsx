@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 
-type Tone = 'neutral' | 'success' | 'warning' | 'danger' | 'accent' | 'info';
+export type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'accent' | 'info';
+type Tone = BadgeTone;
 
 const tones: Record<Tone, string> = {
   neutral: 'bg-ink-100 text-ink-700',

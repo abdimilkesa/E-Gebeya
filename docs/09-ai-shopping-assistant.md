@@ -1,17 +1,19 @@
 # 9. AI shopping assistant
 
-Status: proposed design. Gemini is not connected, and no assistant route is implemented.
+Status: implemented. Gemini is called only from the backend through the five allowlisted tools below. The assistant stays off until `GEMINI_API_KEY` is set in the backend environment.
 
 ## 9.1 Job
 
-The assistant helps a shopper discover public products. It may:
+The assistant is the shopper market analyst. It may:
 
-- search products;
-- compare prices for similar matches;
-- find products within a budget;
-- recommend products that are currently purchasable;
-- return public product details;
-- say which shops sell a product.
+- compare current catalog prices for a product or category;
+- report an average only when at least two purchasable listings are in the result;
+- label affordable, typical, and expensive only as thirds of that same result;
+- say when a listing is out of stock or missing a description or image;
+- recommend the lowest purchasable listing, or one inside a budget the shopper names;
+- reply in English, Afaan Oromo, or Amharic, matching the shopper.
+
+It must say that seller ratings, customer reviews, and past prices are not stored. It must not estimate them.
 
 It is not a general database agent. It is not an order tracker. A logged-in customer does not get order history through the assistant; they use the order pages.
 
@@ -23,7 +25,7 @@ A system instruction that says "do not read passwords" can be contradicted by a 
 flowchart TD
   user[Shopper message] --> route[POST /api/v1/ai/chat]
   route --> trim[Validate message and short history]
-  trim --> gemini[Gemini with five declared tools]
+  trim --> gemini[Gemini with six declared tools]
   gemini --> choice{Model requests a tool}
   choice -->|No| reply[Return reply and the products the tools actually returned]
   choice -->|Yes| args[Validate arguments with a schema]
@@ -41,11 +43,12 @@ Each tool is a backend function. Argument validation rejects extra fields.
 
 | Tool | Arguments | Result |
 |---|---|---|
-| `search_products` | `query` string 1–100, optional `category` slug, optional `minPrice`, optional `maxPrice`, optional `limit` 1–10 | Matching public products |
-| `get_product` | `productId` UUID | One public product, or empty |
-| `compare_product_prices` | `query` string 1–100 | Matches ordered by price ascending, limit 10 |
-| `find_products_within_budget` | `query` string 1–100, `budget` decimal greater than 0 | Purchasable matches with `price <= budget`, cheapest first, limit 10 |
-| `list_shops_for_product` | `query` string 1–100 | Distinct public shops that have a matching visible product, limit 10 |
+| `searchProducts` | optional `query` 1–100, optional `category` slug, optional `minPrice`, optional `maxPrice`, optional `availableOnly`, `limit` 1–10 | Matching public products |
+| `getProductDetails` | `productId` UUID | One public product, or empty |
+| `getShopDetails` | `shopId` UUID | Public shop name, description, address, phone, and logo. No bank fields |
+| `findNearbyShops` | optional `query`, optional `category`, optional `maxPrice`, optional `radiusKm` up to 50, `limit` 1–10 | Public shops and products sorted by distance. The model cannot pass coordinates; the server uses the location the shopper shared, or refuses |
+| `analyzeMarket` | `query` and/or `category` slug, optional `minPrice`, optional `maxPrice`, `limit` 1–10 | Matching public listings, including ones that cannot be bought, plus counts, the average when at least two can be bought, and nulls for ratings, reviews, and price history |
+| `compareProducts` | `productIds`, two or three UUIDs | Those public products, in the requested order |
 
 A turn may execute at most three tool calls. A fourth request from the model is ignored and the model is asked to answer from what it already has.
 
@@ -109,3 +112,14 @@ This case is a required test in [11-testing-strategy.md](11-testing-strategy.md)
 - Return bank account numbers. They are not in the view, and checkout is where a buyer sees the account they must pay.
 - Invent a price that is not in `products`. The UI must not create a cart line from prose alone.
 - Continue a conversation server-side after the response is sent. The browser may send the trimmed history back on the next turn.
+
+## 9.8 Configuration
+
+Set these in the backend environment only (`.env` locally, the host's secret store in production):
+
+| Variable | Purpose |
+|---|---|
+| `GEMINI_API_KEY` | Google AI Studio key. Leave empty to disable the assistant |
+| `GEMINI_MODEL` | Defaults to `gemini-3.5-flash-lite` |
+
+Do not create a `VITE_GEMINI_API_KEY`. The browser calls `POST /api/v1/ai/chat` and never sees the key. A missing key returns `502 ASSISTANT_UNAVAILABLE` with a generic message. The server log records that the assistant is not configured and does not record the key, the shopper's message, or their coordinates.

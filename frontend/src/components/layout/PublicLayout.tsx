@@ -8,6 +8,7 @@ import { cn } from '../../lib/cn';
 import { ButtonLink } from '../ui/Button';
 import { LoadingState } from '../ui/States';
 import { AccountMenu } from './AccountMenu';
+import { AssistantWidget } from '../../features/assistant/AssistantWidget';
 import { Logo } from './Logo';
 
 function SearchBox({ className }: { className?: string }) {
@@ -109,6 +110,7 @@ export function PublicLayout() {
         </Suspense>
       </main>
 
+      <AssistantWidget />
       <footer className="border-t border-ink-100 bg-ink-50/60">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-sm text-ink-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>

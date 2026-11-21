@@ -5,4 +5,7 @@ export * from './catalog.js';
 export * from './admin.js';
 export * from './merchant.js';
 export * from './cart.js';
+export * from './customer.js';
+export * from './orders.js';
 export * from './checkout.js';
+export * from './assistant.js';

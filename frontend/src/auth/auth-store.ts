@@ -23,6 +23,13 @@ export const authStore = {
     emit();
   },
 
+  /** Reflects a profile edit without waiting for the next token refresh. */
+  updateUser(changes: Partial<Pick<AuthUser, 'fullName'>>) {
+    if (!session) return;
+    session = { ...session, user: { ...session.user, ...changes } };
+    emit();
+  },
+
   clear() {
     if (session !== null) {
       session = null;

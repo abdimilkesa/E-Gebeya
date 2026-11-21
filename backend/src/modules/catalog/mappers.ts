@@ -72,7 +72,7 @@ export const publicProductSelect = {
   isAvailable: true,
   stockQuantity: true,
   images: { select: { url: true }, orderBy: { position: 'asc' }, take: 1 },
-  category: { select: { slug: true, name: true } },
+  category: { select: { slug: true, name: true, isActive: true } },
   shop: { select: { id: true, name: true, slug: true } },
 } satisfies Prisma.ProductSelect;
 

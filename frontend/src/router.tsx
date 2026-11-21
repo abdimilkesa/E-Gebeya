@@ -2,7 +2,10 @@ import {
   ClipboardList,
   FolderTree,
   LayoutDashboard,
+  MapPin,
   Package,
+  ReceiptText,
+  Sparkles,
   Store,
   UserCircle,
   Users,
@@ -33,6 +36,10 @@ const LoginPage = lazyPage(() => import('./features/auth/LoginPage'), 'LoginPage
 const RegisterPage = lazyPage(() => import('./features/auth/RegisterPage'), 'RegisterPage');
 const AccountPage = lazyPage(() => import('./features/auth/AccountPage'), 'AccountPage');
 const ChangePasswordPage = lazyPage(() => import('./features/auth/ChangePasswordPage'), 'ChangePasswordPage');
+const ShopperDashboardPage = lazyPage(() => import('./features/customer/DashboardPage'), 'ShopperDashboardPage');
+const OrdersPage = lazyPage(() => import('./features/customer/OrdersPage'), 'OrdersPage');
+const OrderDetailPage = lazyPage(() => import('./features/customer/OrderDetailPage'), 'OrderDetailPage');
+const AddressesPage = lazyPage(() => import('./features/customer/AddressesPage'), 'AddressesPage');
 
 const AdminOverviewPage = lazyPage(() => import('./features/admin/OverviewPage'), 'OverviewPage');
 const AdminShopsPage = lazyPage(() => import('./features/admin/ShopsPage'), 'ShopsPage');
@@ -56,6 +63,13 @@ const ADMIN_NAV: DashboardNavItem[] = [
   { to: '/admin/customers', label: 'Customers', icon: Users },
   { to: '/admin/categories', label: 'Categories', icon: FolderTree },
   { to: '/admin/audit-log', label: 'Audit log', icon: ClipboardList },
+];
+
+const SHOPPER_NAV: DashboardNavItem[] = [
+  { to: '/shopper', label: 'Market analyst', icon: Sparkles, end: true },
+  { to: '/account/orders', label: 'Orders', icon: ReceiptText },
+  { to: '/account/addresses', label: 'Addresses', icon: MapPin },
+  { to: '/account', label: 'Account', icon: UserCircle },
 ];
 
 const MERCHANT_NAV: DashboardNavItem[] = [
@@ -127,6 +141,42 @@ export const router = createBrowserRouter([
               </RequireSignedIn>
             ),
           },
+          {
+            path: 'account/orders',
+            element: (
+              <RequireRole roles={['CUSTOMER']}>
+                <OrdersPage />
+              </RequireRole>
+            ),
+          },
+          {
+            path: 'account/orders/:orderId',
+            element: (
+              <RequireRole roles={['CUSTOMER']}>
+                <OrderDetailPage />
+              </RequireRole>
+            ),
+          },
+          {
+            path: 'account/addresses',
+            element: (
+              <RequireRole roles={['CUSTOMER']}>
+                <AddressesPage />
+              </RequireRole>
+            ),
+          },
+          { path: '*', element: <NotFoundPage /> },
+        ],
+      },
+      {
+        path: 'shopper',
+        element: (
+          <RequireRole roles={['CUSTOMER']}>
+            <DashboardLayout area="Shopper" nav={SHOPPER_NAV} />
+          </RequireRole>
+        ),
+        children: [
+          { index: true, element: <ShopperDashboardPage /> },
           { path: '*', element: <NotFoundPage /> },
         ],
       },

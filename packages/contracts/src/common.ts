@@ -4,6 +4,9 @@ import type { ErrorCode } from './enums.js';
 /** Business currency. Money travels as decimal strings ("1500.00") so no client uses binary floats. */
 export const CURRENCY = 'ETB';
 
+/** Calendar days (order numbers, daily reports) follow Ethiopian local time. */
+export const BUSINESS_TIME_ZONE = 'Africa/Addis_Ababa';
+
 /** Demo camera default (Jimma). It is a starting view, not a geofence. */
 export const DEFAULT_MAP_CENTER = { lat: 7.6667, lng: 36.8333 } as const;
 export const DEFAULT_MAP_ZOOM = 13;

@@ -8,12 +8,17 @@
  */
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config as loadEnv } from 'dotenv';
 
 const backendDir = fileURLToPath(new URL('..', import.meta.url));
+// CLIs run through Node itself: `npx` is a .cmd shim on Windows that execFileSync cannot spawn.
+const resolveBin = createRequire(import.meta.url).resolve;
+const prismaCli = resolveBin('prisma/build/index.js');
+const tsxCli = resolveBin('tsx/cli');
 loadEnv({ path: path.join(backendDir, '..', '.env'), quiet: true });
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -40,10 +45,14 @@ Object.assign(process.env, {
   DEMO_ACCOUNT_PASSWORD: process.env.E2E_DEMO_PASSWORD ?? 'E2e-demo-pass-2026',
 });
 
-const exec = (command: string, args: string[]) =>
-  execFileSync(command, args, { cwd: backendDir, env: process.env, stdio: ['ignore', 'inherit', 'inherit'] });
+const runNode = (args: string[]) =>
+  execFileSync(process.execPath, args, {
+    cwd: backendDir,
+    env: process.env,
+    stdio: ['ignore', 'inherit', 'inherit'],
+  });
 
-exec('npx', ['prisma', 'migrate', 'deploy']);
+runNode([prismaCli, 'migrate', 'deploy']);
 
 const { prisma } = await import('../src/lib/prisma.js');
 const tables = (
@@ -55,7 +64,7 @@ if (tables.length > 0) {
   await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${tables.join(', ')} RESTART IDENTITY CASCADE`);
 }
 
-exec('npx', ['tsx', 'prisma/seed.ts']);
-exec('npx', ['tsx', 'prisma/seed-demo.ts']);
+runNode([tsxCli, 'prisma/seed.ts']);
+runNode([tsxCli, 'prisma/seed-demo.ts']);
 
 await import('../src/server.js');

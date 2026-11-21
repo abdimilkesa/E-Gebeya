@@ -72,6 +72,10 @@ const envSchema = z
       .trim()
       .regex(/^[A-Za-z0-9_-]+$/, 'Use letters, digits, dashes or underscores')
       .default('marketplace'),
+
+    // Server-only. Empty disables the assistant; the value is never sent to the browser.
+    GEMINI_API_KEY: optionalString,
+    GEMINI_MODEL: z.string().trim().min(1).max(100).default('gemini-3.5-flash-lite'),
   })
   .superRefine((env, ctx) => {
     if (env.STORAGE_DRIVER === 'cloudinary') {

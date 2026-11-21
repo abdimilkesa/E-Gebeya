@@ -97,5 +97,5 @@ export function homePathFor(user: AuthUser): string {
   if (user.mustChangePassword) return '/account/change-password';
   if (user.role === 'SUPER_ADMIN') return '/admin';
   if (user.role === 'MERCHANT') return '/merchant';
-  return '/';
+  return '/shopper';
 }

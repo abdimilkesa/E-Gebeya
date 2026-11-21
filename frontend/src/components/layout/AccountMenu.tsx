@@ -1,4 +1,4 @@
-import { ChevronDown, KeyRound, LayoutDashboard, LogOut, User } from 'lucide-react';
+import { ChevronDown, KeyRound, LayoutDashboard, LogOut, MapPin, ReceiptText, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../../auth/AuthProvider';
@@ -29,7 +29,8 @@ export function AccountMenu({ align = 'right' }: { align?: 'left' | 'right' }) {
   }, [open]);
 
   if (!user) return null;
-  const dashboard = user.role === 'SUPER_ADMIN' ? '/admin' : user.role === 'MERCHANT' ? '/merchant' : null;
+  const dashboard =
+    user.role === 'SUPER_ADMIN' ? '/admin' : user.role === 'MERCHANT' ? '/merchant' : '/shopper';
 
   const item = 'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-ink-700 hover:bg-ink-50';
 
@@ -67,6 +68,16 @@ export function AccountMenu({ align = 'right' }: { align?: 'left' | 'right' }) {
               <Link role="menuitem" to={dashboard} className={item} onClick={() => setOpen(false)}>
                 <LayoutDashboard className="size-4" /> Dashboard
               </Link>
+            ) : null}
+            {user.role === 'CUSTOMER' ? (
+              <>
+                <Link role="menuitem" to="/account/orders" className={item} onClick={() => setOpen(false)}>
+                  <ReceiptText className="size-4" /> Your orders
+                </Link>
+                <Link role="menuitem" to="/account/addresses" className={item} onClick={() => setOpen(false)}>
+                  <MapPin className="size-4" /> Saved addresses
+                </Link>
+              </>
             ) : null}
             <Link role="menuitem" to="/account" className={item} onClick={() => setOpen(false)}>
               <User className="size-4" /> Account

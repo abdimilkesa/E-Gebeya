@@ -25,8 +25,10 @@ export function CartPage() {
     );
   }
 
+  const readyToOrder = Boolean(cart && cart.shops.length > 0 && !cart.hasIssues && !pending);
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-6xl px-4 py-6 pb-28 sm:px-6 sm:py-8 lg:pb-8">
       <h1 className="text-2xl font-semibold tracking-tight text-ink-950">Your cart</h1>
       {isLoading ? (
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -107,32 +109,47 @@ export function CartPage() {
                   </button>
                 </div>
               ) : null}
-              {mode === 'guest' ? (
-                <Button
-                  size="lg"
-                  className="mt-5 w-full"
-                  onClick={() => navigate('/login', { state: { from: '/checkout' } })}
-                >
-                  Sign in to check out
-                </Button>
-              ) : (
-                <Button
-                  size="lg"
-                  className="mt-5 w-full"
-                  disabled={cart.hasIssues || pending}
-                  onClick={() => navigate('/checkout')}
-                >
-                  Review checkout <ArrowRight className="size-4" />
-                </Button>
-              )}
+              <div className="hidden lg:block">
+                <OrderButton mode={mode} disabled={!readyToOrder} onNavigate={navigate} />
+              </div>
               {mode === 'guest' ? (
                 <p className="mt-3 text-center text-xs text-ink-500">Your cart is kept on this device and moves into your account when you sign in.</p>
               ) : null}
             </Card>
           </div>
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-ink-100 bg-white p-4 pr-20 shadow-[0_-8px_24px_rgba(28,25,23,0.08)] lg:hidden">
+            <div className="mb-3 flex items-baseline justify-between text-sm">
+              <span className="text-ink-600">Merchandise subtotal</span>
+              <span className="font-semibold text-ink-950">{formatMoney(cart.merchandiseSubtotal)}</span>
+            </div>
+            <OrderButton mode={mode} disabled={!readyToOrder} onNavigate={navigate} />
+          </div>
         </>
       )}
     </div>
+  );
+}
+
+function OrderButton({
+  mode,
+  disabled,
+  onNavigate,
+}: {
+  mode: 'guest' | 'customer';
+  disabled: boolean;
+  onNavigate: (path: string, options?: { state: { from: string } }) => void;
+}) {
+  if (mode === 'guest') {
+    return (
+      <Button size="lg" className="w-full" onClick={() => onNavigate('/login', { state: { from: '/checkout' } })}>
+        Sign in to check out
+      </Button>
+    );
+  }
+  return (
+    <Button size="lg" className="w-full" disabled={disabled} onClick={() => onNavigate('/checkout')}>
+      Place order <ArrowRight className="size-4" />
+    </Button>
   );
 }
 

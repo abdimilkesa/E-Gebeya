@@ -136,34 +136,37 @@ export async function listPublicProducts(
   if (query.minPrice) conditions.push(Prisma.sql`v.price >= ${query.minPrice}::numeric`);
   if (query.maxPrice) conditions.push(Prisma.sql`v.price <= ${query.maxPrice}::numeric`);
   if (query.available !== undefined) {
-    conditions.push(query.available ? Prisma.sql`v.can_purchase` : Prisma.sql`NOT v.can_purchase`);
+    conditions.push(query.available ? Prisma.sql`v.in_stock` : Prisma.sql`NOT v.in_stock`);
   }
   const where = Prisma.join(conditions, ' AND ');
 
+  // The view carries exactly the AI document's columns; listing date comes from the product row.
   let orderBy: Prisma.Sql;
   switch (query.sort) {
     case 'price_asc':
-      orderBy = Prisma.sql`v.price ASC, v.created_at DESC`;
+      orderBy = Prisma.sql`v.price ASC, p.created_at DESC`;
       break;
     case 'price_desc':
-      orderBy = Prisma.sql`v.price DESC, v.created_at DESC`;
+      orderBy = Prisma.sql`v.price DESC, p.created_at DESC`;
       break;
     case 'newest':
-      orderBy = Prisma.sql`v.created_at DESC`;
+      orderBy = Prisma.sql`p.created_at DESC`;
       break;
     default:
       orderBy = query.q
         ? Prisma.sql`(v.name ILIKE ${`${escapeLike(query.q)}%`}) DESC,
-            similarity(v.name, ${query.q}) DESC, v.created_at DESC`
-        : Prisma.sql`v.can_purchase DESC, v.created_at DESC`;
+            similarity(v.name, ${query.q}) DESC, p.created_at DESC`
+        : Prisma.sql`v.in_stock DESC, p.created_at DESC`;
   }
 
   const { skip, take } = pageArgs(query.page, query.pageSize);
   const [rows, counts] = await Promise.all([
     prisma.$queryRaw<{ id: string }[]>`
-      SELECT v.id FROM public_catalog_products v
+      SELECT v.product_id AS id
+      FROM public_catalog_products v
+      JOIN products p ON p.id = v.product_id
       WHERE ${where}
-      ORDER BY ${orderBy}, v.id
+      ORDER BY ${orderBy}, v.product_id
       LIMIT ${take} OFFSET ${skip}`,
     prisma.$queryRaw<{ total: number }[]>`
       SELECT COUNT(*)::int AS total FROM public_catalog_products v WHERE ${where}`,
