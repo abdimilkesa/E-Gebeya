@@ -42,4 +42,9 @@ export default defineConfig(
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
+  {
+    // Command-line scripts report progress on stdout.
+    files: ['backend/prisma/**/*.ts', 'backend/tests/global-setup.ts'],
+    rules: { 'no-console': 'off' },
+  },
 );
