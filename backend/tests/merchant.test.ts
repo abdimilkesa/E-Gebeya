@@ -12,7 +12,7 @@ import {
   createShop,
 } from './helpers.js';
 
-async function uploadImage(token: string, buffer: Buffer = PNG_1PX, filename = 'photo.png') {
+function uploadImage(token: string, buffer: Buffer = PNG_1PX, filename = 'photo.png') {
   return api()
     .post('/api/v1/merchant/uploads/images')
     .set(bearer(token))

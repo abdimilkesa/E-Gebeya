@@ -253,6 +253,8 @@ model Shop {
 
   @@index([merchantId])
   @@index([status, latitude, longitude])
+  /// Trigram index for case-insensitive name search (needs the pg_trgm extension).
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "shops_name_trgm_idx")
   @@map("shops")
 }
 
@@ -293,6 +295,8 @@ model Product {
   @@index([shopId, status])
   @@index([categoryId])
   @@index([status, price])
+  /// Trigram index for case-insensitive name search (needs the pg_trgm extension).
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "products_name_trgm_idx")
   @@map("products")
 }
 
