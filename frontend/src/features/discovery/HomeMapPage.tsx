@@ -140,7 +140,9 @@ export function HomeMapPage() {
             <p className="text-ink-600" aria-live="polite">
               {shopsQuery.isPending
                 ? 'Finding shops…'
-                : hasMapsKey && onlyInView && bounds
+                : shopsQuery.isPlaceholderData
+                  ? 'Searching…'
+                  : hasMapsKey && onlyInView && bounds
                   ? `${pluralize(visibleShops.length, 'shop')} in this map area`
                   : pluralize(shops.length, 'shop')}
             </p>

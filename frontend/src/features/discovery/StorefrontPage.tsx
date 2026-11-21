@@ -90,7 +90,7 @@ export function StorefrontPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="-mt-10 flex flex-col gap-6 rounded-2xl border border-ink-100 bg-white p-5 shadow-card sm:-mt-14 sm:p-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="relative -mt-10 flex flex-col gap-6 rounded-2xl border border-ink-100 bg-white p-5 shadow-card sm:-mt-14 sm:p-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex gap-4">
             <ShopAvatar shop={shop} className="size-16 text-2xl sm:size-20" />
             <div className="min-w-0">
