@@ -1,6 +1,6 @@
 import { Map as MapIcon, Search, ShoppingBag, Store } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Link, NavLink, Outlet, useNavigate, useSearchParams } from 'react-router';
+import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { useAuth } from '../../auth/AuthProvider';
 import { APP_NAME, APP_TAGLINE } from '../../config';
 import { useCart } from '../../features/cart/CartProvider';
@@ -64,6 +64,7 @@ const navLink = ({ isActive }: { isActive: boolean }) =>
 
 export function PublicLayout() {
   const { user, ready } = useAuth();
+  const isHome = useLocation().pathname === '/';
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-30 border-b border-ink-100 bg-white/90 backdrop-blur">
@@ -94,9 +95,11 @@ export function PublicLayout() {
             )}
           </div>
         </div>
-        <div className="border-t border-ink-100 px-4 py-2 lg:hidden">
-          <SearchBox />
-        </div>
+        {isHome ? null : (
+          <div className="border-t border-ink-100 px-4 py-2 lg:hidden">
+            <SearchBox />
+          </div>
+        )}
       </header>
 
       <main className="flex-1">
