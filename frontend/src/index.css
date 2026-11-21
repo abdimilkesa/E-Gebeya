@@ -1,59 +1,56 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/inter';
 
 /*
- * Design tokens: white surfaces, ink (near-black) for text and primary actions,
- * gold accent for highlights. accent-700 is the darkest gold and the only one used
- * for text on white (contrast ratio ~6:1).
+ * Brand: white as the primary surface, ink (near-black) for text and main actions,
+ * gold as the accent. Gold text uses accent-700+ to keep WCAG AA contrast on white.
  */
 @theme {
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --color-ink-50: #f7f7f8;
-  --color-ink-100: #eeeef0;
+  --color-ink-100: #ececee;
   --color-ink-200: #d9d9de;
-  --color-ink-300: #b8b8c1;
-  --color-ink-400: #8e8e9a;
-  --color-ink-500: #6b6b78;
-  --color-ink-600: #52525e;
-  --color-ink-700: #3f3f49;
-  --color-ink-800: #27272f;
-  --color-ink-900: #16161c;
+  --color-ink-300: #b5b5bd;
+  --color-ink-400: #8a8a94;
+  --color-ink-500: #6b6b75;
+  --color-ink-600: #52525b;
+  --color-ink-700: #3f3f46;
+  --color-ink-800: #27272a;
+  --color-ink-900: #18181b;
   --color-ink-950: #0b0b0f;
 
-  --color-accent-50: #fffaeb;
-  --color-accent-100: #fdf0c7;
-  --color-accent-200: #fbe08a;
-  --color-accent-300: #f8cc4d;
+  --color-accent-50: #fffbea;
+  --color-accent-100: #fff3c4;
+  --color-accent-200: #fce588;
+  --color-accent-300: #fadb5f;
   --color-accent-400: #f0b429;
-  --color-accent-500: #d99a12;
-  --color-accent-600: #b7770c;
+  --color-accent-500: #de911d;
+  --color-accent-600: #cb6e17;
   --color-accent-700: #8f5b0b;
-  --color-accent-800: #744a10;
-  --color-accent-900: #603d12;
+  --color-accent-800: #6b4508;
+  --color-accent-900: #4a2f05;
 
-  --shadow-card: 0 1px 2px rgb(11 11 15 / 0.04), 0 1px 3px rgb(11 11 15 / 0.06);
-  --shadow-pop: 0 10px 30px -10px rgb(11 11 15 / 0.25);
+  --shadow-card: 0 1px 2px rgb(11 11 15 / 0.04), 0 4px 16px rgb(11 11 15 / 0.06);
+  --shadow-pop: 0 8px 32px rgb(11 11 15 / 0.16);
 }
 
 @layer base {
   html {
-    @apply bg-white text-ink-900 antialiased;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
   }
 
   body {
-    @apply min-h-dvh;
+    @apply bg-white font-sans text-ink-900 antialiased;
   }
 
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-accent-500;
   }
 
-  ::selection {
-    @apply bg-accent-200 text-ink-950;
+  /* Google Maps info windows inherit the app font. */
+  .gm-style,
+  .gm-style-iw {
+    font-family: var(--font-sans) !important;
   }
-}
-
-dialog::backdrop {
-  background: rgb(11 11 15 / 0.45);
 }
