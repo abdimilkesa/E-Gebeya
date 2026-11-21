@@ -13,22 +13,26 @@ import { createBrowserRouter, Outlet, ScrollRestoration } from 'react-router';
 import { GuestOnly, RequireRole, RequireSignedIn } from './auth/guards';
 import { DashboardLayout, type DashboardNavItem } from './components/layout/DashboardLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
-import { AccountPage } from './features/auth/AccountPage';
-import { ChangePasswordPage } from './features/auth/ChangePasswordPage';
-import { LoginPage } from './features/auth/LoginPage';
-import { RegisterPage } from './features/auth/RegisterPage';
-import { CartPage } from './features/cart/CartPage';
-import { CheckoutPage } from './features/cart/CheckoutPage';
 import { HomeMapPage } from './features/discovery/HomeMapPage';
-import { ProductPage } from './features/discovery/ProductPage';
-import { SearchPage } from './features/discovery/SearchPage';
-import { StorefrontPage } from './features/discovery/StorefrontPage';
 import { NotFoundPage, RouteErrorPage } from './pages/ErrorPages';
 
-/** Dashboards are split into their own chunks so shoppers never download them. */
+/**
+ * Only the map landing page ships in the first download; every other page is its own chunk,
+ * so shoppers never download the dashboards.
+ */
 function lazyPage<M extends Record<string, unknown>>(load: () => Promise<M>, name: keyof M & string) {
   return lazy(async () => ({ default: (await load())[name] as ComponentType }));
 }
+
+const SearchPage = lazyPage(() => import('./features/discovery/SearchPage'), 'SearchPage');
+const StorefrontPage = lazyPage(() => import('./features/discovery/StorefrontPage'), 'StorefrontPage');
+const ProductPage = lazyPage(() => import('./features/discovery/ProductPage'), 'ProductPage');
+const CartPage = lazyPage(() => import('./features/cart/CartPage'), 'CartPage');
+const CheckoutPage = lazyPage(() => import('./features/cart/CheckoutPage'), 'CheckoutPage');
+const LoginPage = lazyPage(() => import('./features/auth/LoginPage'), 'LoginPage');
+const RegisterPage = lazyPage(() => import('./features/auth/RegisterPage'), 'RegisterPage');
+const AccountPage = lazyPage(() => import('./features/auth/AccountPage'), 'AccountPage');
+const ChangePasswordPage = lazyPage(() => import('./features/auth/ChangePasswordPage'), 'ChangePasswordPage');
 
 const AdminOverviewPage = lazyPage(() => import('./features/admin/OverviewPage'), 'OverviewPage');
 const AdminShopsPage = lazyPage(() => import('./features/admin/ShopsPage'), 'ShopsPage');

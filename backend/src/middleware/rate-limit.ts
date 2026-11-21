@@ -18,8 +18,6 @@ const base: Partial<Options> = {
   },
 };
 
-const ipKey = (ip: string | undefined) => ipKeyGenerator(ip ?? 'unknown');
-
 /*
  * Per-IP limits are looser than the security document's targets because a venue or
  * campus network puts many people behind one public IP. Per-account limits stay strict.
@@ -31,7 +29,7 @@ export const loginAccountLimiter = rateLimit({
   limit: 10,
   keyGenerator: (req) => {
     const username = typeof req.body?.username === 'string' ? req.body.username : '';
-    return `${ipKey(req.ip)}|${username.trim().toLowerCase().slice(0, 30)}`;
+    return `${ipKeyGenerator(req.ip ?? 'unknown')}|${username.trim().toLowerCase().slice(0, 30)}`;
   },
 });
 
@@ -43,7 +41,7 @@ export const refreshLimiter = rateLimit({ ...base, limit: 60 });
 export const uploadLimiter = rateLimit({
   ...base,
   limit: 10,
-  keyGenerator: (req) => req.auth?.userId ?? ipKey(req.ip),
+  keyGenerator: (req) => req.auth?.userId ?? ipKeyGenerator(req.ip ?? 'unknown'),
 });
 
 export const apiLimiter = rateLimit({ ...base, limit: 300 });
