@@ -113,7 +113,8 @@ async function performRefresh(): Promise<AuthSession | null> {
       headers: { Accept: 'application/json' },
     });
     if (!response.ok) {
-      authStore.clear();
+      // Only a rejected session signs the user out; rate limits and outages keep it.
+      if (response.status === 401 || response.status === 403) authStore.clear();
       return null;
     }
     const { data } = await parse<AuthSession>(response);
