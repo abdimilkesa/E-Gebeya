@@ -106,7 +106,7 @@ export function HomeMapPage() {
               <Button type="submit">Search</Button>
             </div>
           </form>
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1" aria-label="Filter by category">
+          <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-1" aria-label="Filter by category">
             <CategoryChip active={!category} onClick={() => update({ category: '' })}>
               All
             </CategoryChip>
