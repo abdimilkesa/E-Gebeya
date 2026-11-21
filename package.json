@@ -1,0 +1,40 @@
+{
+  "name": "marketplace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Location-based multi-vendor marketplace (Team 30, Cursor Hackathon Jimma)",
+  "type": "module",
+  "workspaces": [
+    "packages/contracts",
+    "backend",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "build:contracts": "npm run build -w @marketplace/contracts",
+    "dev": "npm run build:contracts && concurrently -k -n contracts,api,web -c gray,blue,magenta \"npm run dev -w @marketplace/contracts\" \"npm run dev -w @marketplace/backend\" \"npm run dev -w @marketplace/frontend\"",
+    "build": "npm run build:contracts && npm run build -w @marketplace/backend && npm run build -w @marketplace/frontend",
+    "typecheck": "npm run build:contracts && npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run build:contracts && npm run test -w @marketplace/backend && npm run test -w @marketplace/frontend",
+    "test:e2e": "npm run build:contracts && npm run test:e2e -w @marketplace/frontend",
+    "db:migrate": "npm run db:migrate -w @marketplace/backend",
+    "db:deploy": "npm run db:deploy -w @marketplace/backend",
+    "db:seed": "npm run db:seed -w @marketplace/backend",
+    "db:seed:demo": "npm run db:seed:demo -w @marketplace/backend"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.7",
+    "eslint": "^10.15.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1",
+    "typescript": "~6.0.0",
+    "typescript-eslint": "^8.73.0"
+  }
+}

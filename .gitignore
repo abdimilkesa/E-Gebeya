@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+coverage/
+
+# Environment files (never commit real credentials)
+.env
+.env.*
+!.env.example
+
+# Generated Prisma client
+backend/src/generated/
+
+# Local file storage used by the development storage driver
+backend/storage/
+
+# Playwright artifacts
+frontend/playwright-report/
+frontend/test-results/
+frontend/blob-report/
+frontend/playwright/.cache/
+
+# Logs and OS/editor files
+*.log
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Office editor lock files
+.~lock.*#

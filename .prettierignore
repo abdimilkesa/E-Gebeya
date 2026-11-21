@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+package-lock.json
+backend/src/generated
+backend/prisma/migrations
+backend/storage
+frontend/playwright-report
+frontend/test-results
+docs
+*.md
