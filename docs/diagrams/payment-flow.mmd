@@ -1,0 +1,20 @@
+flowchart TD
+  start[Checkout is committed and stock is held] --> method{Payment method}
+  method -->|Chapa| init[Initialize one payment for the grand total]
+  init --> initOk{Chapa initialize succeeded}
+  initOk -->|No| retry[Customer may retry until the hold expires]
+  initOk -->|Yes| hosted[Customer pays on the Chapa page]
+  hosted --> verify[Backend verifies tx_ref with Chapa]
+  verify --> verified{Verified amount is the stored amount and currency is ETB}
+  verified -->|No| failed[Mark that attempt FAILED and keep the order unpaid]
+  verified -->|Yes| allNew[Set every sub-order to PAID and NEW]
+  allNew --> settle[Insert one settlement row per sub-order]
+  method -->|Bank transfer| instructions[Show each merchant account and the sub-order amount]
+  instructions --> upload[Customer uploads a receipt for one merchant]
+  upload --> waiting[That payment becomes AWAITING_VERIFICATION]
+  waiting --> decision{Owning merchant decision}
+  decision -->|Accept| oneNew[That sub-order only becomes PAID and NEW]
+  decision -->|Reject| rejected[Customer may upload another receipt]
+  oneNew --> parent[Recompute parent payment and fulfillment status]
+  settle --> parent
+  failed --> retry

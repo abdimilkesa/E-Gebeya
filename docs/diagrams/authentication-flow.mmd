@@ -1,0 +1,14 @@
+flowchart TD
+  login[Submit username and password] --> generic{User active and password valid}
+  generic -->|No| reject[Same invalid-credentials response]
+  generic -->|Yes| issue[Issue access token and refresh cookie]
+  issue --> request[API request with bearer token]
+  request --> version{token_version matches and user is active}
+  version -->|No| unauth[401 and the client must refresh or stop]
+  version -->|Yes| password{must_change_password}
+  password -->|Yes| limited[Only me, change-password, and logout]
+  password -->|No| role{Route role matches}
+  role -->|No| forbidden[403]
+  role -->|Yes| owner{Resource is public or owned by the caller}
+  owner -->|No| missing[404]
+  owner -->|Yes| handler[Run the use case]

@@ -1,0 +1,16 @@
+flowchart TD
+  openMap[Open landing map] --> browse{Choose an action}
+  browse --> marker[Select a shop marker]
+  browse --> search[Search products]
+  marker --> shopPage[Open shop page]
+  search --> shopPage
+  shopPage --> addCart[Add product to cart]
+  addCart --> more{Add a product from another shop}
+  more -->|Yes| browse
+  more -->|No| checkoutIntent[Start checkout]
+  checkoutIntent --> authed{Authenticated customer}
+  authed -->|No| register[Register or log in]
+  register --> merge[Merge guest cart into the server cart]
+  merge --> checkoutForm[Enter address, phone, delivery, and payment]
+  authed -->|Yes| checkoutForm
+  checkoutForm --> placed[Parent order and one sub-order per shop are created]

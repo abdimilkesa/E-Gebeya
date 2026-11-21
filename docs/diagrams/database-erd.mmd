@@ -1,0 +1,268 @@
+erDiagram
+  users ||--o{ refresh_tokens : opens
+  users ||--o{ shops : owns
+  users ||--o{ customer_addresses : saves
+  users ||--o| carts : has
+  users ||--o{ orders : places
+  users ||--o{ notifications : receives
+  users |o--o{ audit_logs : performs
+  users |o--o{ product_views : may_view
+  users |o--o{ shop_views : may_view
+  users ||--o{ payment_receipts : uploads
+  users |o--o{ payments : verifies
+  users ||--o{ merchant_orders : assigned
+  users ||--o{ merchant_settlements : owed
+  users |o--o{ merchant_settlements : records
+
+  shops ||--o{ products : lists
+  shops ||--o{ merchant_orders : fulfills
+  shops ||--o{ shop_views : receives
+  shops ||--o{ merchant_settlements : earns
+
+  categories ||--o{ products : classifies
+  products ||--o{ cart_items : selected_by
+  products ||--o{ order_items : copied_onto
+  products ||--o{ product_views : receives
+
+  carts ||--o{ cart_items : contains
+
+  orders ||--|{ merchant_orders : splits_into
+  orders ||--o{ payments : paid_by
+
+  merchant_orders ||--|{ order_items : contains
+  merchant_orders |o--o| payments : bank_payment
+  merchant_orders ||--o| merchant_settlements : settles
+
+  payments ||--o{ payment_receipts : evidenced_by
+
+  users {
+    uuid id PK
+    enum role
+    enum status
+    string full_name
+    string username UK
+    string password_hash
+    boolean must_change_password
+    int token_version
+    datetime last_login_at
+    datetime created_at
+    datetime updated_at
+  }
+
+  refresh_tokens {
+    uuid id PK
+    uuid user_id FK
+    string token_hash UK
+    datetime expires_at
+    datetime revoked_at
+    string ip_address
+    string user_agent
+    datetime created_at
+  }
+
+  shops {
+    uuid id PK
+    uuid merchant_id FK
+    string name
+    string slug UK
+    string description
+    string phone
+    string address_text
+    decimal latitude
+    decimal longitude
+    enum status
+    decimal delivery_fee_etb
+    string bank_name
+    string bank_account_name
+    string bank_account_number
+    datetime created_at
+    datetime updated_at
+  }
+
+  categories {
+    uuid id PK
+    string name UK
+    string slug UK
+    string description
+    boolean is_active
+    datetime created_at
+    datetime updated_at
+  }
+
+  products {
+    uuid id PK
+    uuid shop_id FK
+    uuid category_id FK
+    string name
+    string description
+    decimal price
+    string image_url
+    int stock_quantity
+    boolean is_available
+    enum status
+    datetime created_at
+    datetime updated_at
+  }
+
+  carts {
+    uuid id PK
+    uuid user_id FK
+    datetime created_at
+    datetime updated_at
+  }
+
+  cart_items {
+    uuid id PK
+    uuid cart_id FK
+    uuid product_id FK
+    int quantity
+    datetime created_at
+    datetime updated_at
+  }
+
+  customer_addresses {
+    uuid id PK
+    uuid user_id FK
+    string address_name
+    string house_number
+    string phone_number
+    boolean is_default
+    datetime created_at
+    datetime updated_at
+  }
+
+  orders {
+    uuid id PK
+    string order_number UK
+    uuid customer_id FK
+    string client_request_id UK
+    enum fulfillment_preference
+    string address_name
+    string house_number
+    string phone_number
+    enum payment_method
+    decimal merchandise_subtotal
+    decimal delivery_fee_total
+    decimal grand_total
+    enum payment_status
+    enum fulfillment_status
+    enum stock_hold_state
+    datetime stock_hold_expires_at
+    datetime created_at
+    datetime updated_at
+  }
+
+  merchant_orders {
+    uuid id PK
+    uuid order_id FK
+    uuid shop_id FK
+    uuid merchant_id FK
+    string shop_name_snapshot
+    string customer_full_name
+    string address_name
+    string house_number
+    string phone_number
+    decimal subtotal
+    decimal delivery_fee
+    decimal total
+    enum payment_status
+    enum fulfillment_status
+    string cancellation_reason
+    datetime created_at
+    datetime updated_at
+  }
+
+  order_items {
+    uuid id PK
+    uuid merchant_order_id FK
+    uuid product_id FK
+    string product_name_snapshot
+    decimal unit_price_snapshot
+    int quantity
+    decimal line_total
+    datetime created_at
+  }
+
+  payments {
+    uuid id PK
+    uuid order_id FK
+    uuid merchant_order_id FK
+    enum method
+    decimal amount
+    string currency
+    enum status
+    enum provider
+    string tx_ref UK
+    string provider_reference
+    string checkout_url
+    string payer_email
+    datetime verified_at
+    uuid verified_by_user_id FK
+    string failure_reason
+    datetime created_at
+    datetime updated_at
+  }
+
+  payment_receipts {
+    uuid id PK
+    uuid payment_id FK
+    uuid uploaded_by_user_id FK
+    string image_url
+    string cloudinary_public_id
+    string note
+    datetime created_at
+  }
+
+  merchant_settlements {
+    uuid id PK
+    uuid merchant_order_id FK
+    uuid shop_id FK
+    uuid merchant_id FK
+    decimal gross_amount
+    decimal platform_fee_amount
+    decimal net_amount
+    enum status
+    datetime settled_at
+    uuid settled_by_user_id FK
+    string reference_note
+    datetime created_at
+  }
+
+  product_views {
+    uuid id PK
+    uuid product_id FK
+    uuid viewer_user_id FK
+    string visitor_id
+    datetime viewed_at
+  }
+
+  shop_views {
+    uuid id PK
+    uuid shop_id FK
+    uuid viewer_user_id FK
+    string visitor_id
+    datetime viewed_at
+  }
+
+  notifications {
+    uuid id PK
+    uuid recipient_user_id FK
+    string type
+    string title
+    string body
+    json data
+    datetime read_at
+    datetime created_at
+  }
+
+  audit_logs {
+    uuid id PK
+    uuid actor_user_id FK
+    string action
+    string entity_type
+    uuid entity_id
+    json metadata
+    string ip_address
+    string user_agent
+    datetime created_at
+  }

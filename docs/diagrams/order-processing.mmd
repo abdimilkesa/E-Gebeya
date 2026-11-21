@@ -1,0 +1,16 @@
+flowchart TD
+  cart[Server cart containing one or more shops] --> lock[Lock the product rows in product id order]
+  lock --> check{Every line is purchasable and has stock}
+  check -->|No| fail[Roll back and return the failing lines]
+  check -->|Yes| parent[Insert one parent order]
+  parent --> split[Insert one merchant sub-order per shop]
+  split --> items[Insert order items with name and unit price snapshots]
+  items --> decrement[Decrement stock and set the hold to HELD]
+  decrement --> pay{Payment method}
+  pay -->|Chapa| onePay[Insert one payment for the parent grand total]
+  pay -->|Bank transfer| manyPay[Insert one payment for each sub-order total]
+  onePay --> clear[Clear the cart and commit]
+  manyPay --> clear
+  clear --> after{Method}
+  after -->|Chapa| chapa[Initialize Chapa after the commit]
+  after -->|Bank transfer| banks[Return each merchant bank instruction to the customer]

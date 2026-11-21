@@ -1,0 +1,44 @@
+flowchart TB
+  subgraph client [React SPA]
+    publicUi[Shopping and map]
+    merchantUi[Merchant dashboard]
+    adminUi[Super Admin dashboard]
+    assistantUi[Assistant panel]
+  end
+  subgraph api [Express modular monolith]
+    http[HTTP routers and validation]
+    identity[identity]
+    catalog[catalog]
+    cart[cart]
+    orders[orders]
+    payments[payments]
+    analytics[analytics]
+    assistant[assistant]
+    notifications[notifications]
+    audit[audit]
+  end
+  publicUi --> http
+  merchantUi --> http
+  adminUi --> http
+  assistantUi --> http
+  http --> identity
+  http --> catalog
+  http --> cart
+  http --> orders
+  http --> payments
+  orders --> catalog
+  orders --> payments
+  payments --> notifications
+  orders --> notifications
+  identity --> audit
+  payments --> audit
+  assistant --> catalog
+  catalog --> db[(PostgreSQL)]
+  orders --> db
+  payments --> db
+  identity --> db
+  analytics --> db
+  payments --> chapa[Chapa]
+  catalog --> cloudinary[Cloudinary]
+  assistant --> gemini[Gemini]
+  publicUi --> maps[Google Maps JavaScript API]
