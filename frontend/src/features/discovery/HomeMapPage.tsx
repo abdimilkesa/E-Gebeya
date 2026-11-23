@@ -1,12 +1,13 @@
 import { Search, Store, X } from 'lucide-react';
 import { useMemo, useState, type FormEvent } from 'react';
-import { useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { Button } from '../../components/ui/Button';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/States';
 import { APP_TAGLINE, hasMapsKey } from '../../config';
 import { cn } from '../../lib/cn';
 import { pluralize } from '../../lib/format';
-import { useCategories, usePublicShops, type ShopFilters } from './queries';
+import { ProductCard, ProductGrid, ProductGridSkeleton } from './ProductCard';
+import { useCategories, usePublicProducts, usePublicShops, type ShopFilters } from './queries';
 import { ShopListItem } from './ShopCard';
 import { isInBounds, ShopMap, type Bounds } from './ShopMap';
 
@@ -28,6 +29,12 @@ export function HomeMapPage() {
 
   const shopsQuery = usePublicShops(filters);
   const categoriesQuery = useCategories();
+  const recommendationsQuery = usePublicProducts({
+    available: 'true',
+    sort: 'newest',
+    page: 1,
+    pageSize: 8,
+  });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [bounds, setBounds] = useState<Bounds | null>(null);
   const [onlyInView, setOnlyInView] = useState(true);
@@ -36,7 +43,8 @@ export function HomeMapPage() {
 
   const shops = useMemo(() => shopsQuery.data?.items ?? [], [shopsQuery.data]);
   const visibleShops = useMemo(
-    () => (hasMapsKey && onlyInView && bounds ? shops.filter((shop) => isInBounds(shop, bounds)) : shops),
+    () =>
+      hasMapsKey && onlyInView && bounds ? shops.filter((shop) => isInBounds(shop, bounds)) : shops,
     [shops, bounds, onlyInView],
   );
   const filtered = !!term || !!category;
@@ -63,7 +71,8 @@ export function HomeMapPage() {
   };
 
   return (
-    <div className="grid lg:h-[calc(100dvh-4rem)] lg:grid-cols-[420px_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)]">
+    <div className="pb-10">
+      <div className="grid lg:h-[calc(100dvh-4rem)] lg:grid-cols-[420px_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)]">
         <section
           className="space-y-3 border-b border-ink-100 p-4 lg:col-start-1 lg:row-start-1 lg:border-r"
           aria-label="Find shops"
@@ -73,7 +82,11 @@ export function HomeMapPage() {
             <p className="text-sm text-ink-500">{APP_TAGLINE}</p>
           </div>
           <form onSubmit={submit} className="space-y-2" role="search">
-            <div className="inline-flex rounded-xl bg-ink-100 p-1 text-sm" role="radiogroup" aria-label="Search by">
+            <div
+              className="inline-flex rounded-xl bg-ink-100 p-1 text-sm"
+              role="radiogroup"
+              aria-label="Search by"
+            >
               {(['product', 'shop'] as const).map((value) => (
                 <button
                   key={value}
@@ -83,7 +96,9 @@ export function HomeMapPage() {
                   onClick={() => setDraftMode(value)}
                   className={cn(
                     'rounded-lg px-3 py-1 font-medium transition-colors',
-                    draftMode === value ? 'bg-white text-ink-950 shadow-sm' : 'text-ink-600 hover:text-ink-900',
+                    draftMode === value
+                      ? 'bg-white text-ink-950 shadow-sm'
+                      : 'text-ink-600 hover:text-ink-900',
                   )}
                 >
                   {value === 'product' ? 'Products' : 'Shop names'}
@@ -98,15 +113,22 @@ export function HomeMapPage() {
                   value={draft}
                   onChange={(event) => setDraft(event.target.value)}
                   maxLength={100}
-                  placeholder={draftMode === 'product' ? 'e.g. coffee, phone charger' : 'e.g. Abebe Coffee'}
-                  aria-label={draftMode === 'product' ? 'Find shops selling a product' : 'Find shops by name'}
+                  placeholder={
+                    draftMode === 'product' ? 'e.g. coffee, phone charger' : 'e.g. Abebe Coffee'
+                  }
+                  aria-label={
+                    draftMode === 'product' ? 'Find shops selling a product' : 'Find shops by name'
+                  }
                   className="h-10 w-full rounded-xl border border-ink-200 bg-white pl-9 pr-3 text-sm placeholder:text-ink-400 focus:border-ink-400 focus:outline-none focus:ring-2 focus:ring-accent-400/60"
                 />
               </div>
               <Button type="submit">Search</Button>
             </div>
           </form>
-          <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-1" aria-label="Filter by category">
+          <div
+            className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-1"
+            aria-label="Filter by category"
+          >
             <CategoryChip active={!category} onClick={() => update({ category: '' })}>
               All
             </CategoryChip>
@@ -143,17 +165,25 @@ export function HomeMapPage() {
                 : shopsQuery.isPlaceholderData
                   ? 'Searching…'
                   : hasMapsKey && onlyInView && bounds
-                  ? `${pluralize(visibleShops.length, 'shop')} in this map area`
-                  : pluralize(shops.length, 'shop')}
+                    ? `${pluralize(visibleShops.length, 'shop')} in this map area`
+                    : pluralize(shops.length, 'shop')}
             </p>
             <div className="flex items-center gap-3">
               {hasMapsKey && onlyInView && bounds && visibleShops.length < shops.length ? (
-                <button type="button" className="font-medium text-ink-950 hover:underline" onClick={() => setOnlyInView(false)}>
+                <button
+                  type="button"
+                  className="font-medium text-ink-950 hover:underline"
+                  onClick={() => setOnlyInView(false)}
+                >
                   Show all {shops.length}
                 </button>
               ) : null}
               {filtered ? (
-                <button type="button" onClick={clearAll} className="flex items-center gap-1 font-medium text-ink-950 hover:underline">
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="flex items-center gap-1 font-medium text-ink-950 hover:underline"
+                >
                   <X className="size-3.5" /> Clear
                 </button>
               ) : null}
@@ -177,13 +207,23 @@ export function HomeMapPage() {
                     ? 'Try a different word or category.'
                     : 'Shops appear here as soon as the marketplace administrator opens them.'
                 }
-                action={filtered ? <Button variant="secondary" onClick={clearAll}>Clear filters</Button> : undefined}
+                action={
+                  filtered ? (
+                    <Button variant="secondary" onClick={clearAll}>
+                      Clear filters
+                    </Button>
+                  ) : undefined
+                }
               />
             ) : visibleShops.length === 0 ? (
               <EmptyState
                 title="No shops in this part of the map"
                 description="Zoom out or move the map to see more shops."
-                action={<Button variant="secondary" onClick={() => setOnlyInView(false)}>Show all shops</Button>}
+                action={
+                  <Button variant="secondary" onClick={() => setOnlyInView(false)}>
+                    Show all shops
+                  </Button>
+                }
               />
             ) : (
               <ul className="space-y-3">
@@ -199,6 +239,48 @@ export function HomeMapPage() {
             )}
           </div>
         </section>
+      </div>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6" aria-label="Recommended products">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-accent-700">Fresh from local shops</p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-ink-950">
+              Recommended products
+            </h2>
+            <p className="mt-1 text-sm text-ink-500">
+              Explore available items recently added to the marketplace.
+            </p>
+          </div>
+          <Link
+            to="/search"
+            className="shrink-0 text-sm font-semibold text-ink-800 hover:underline"
+          >
+            Browse all
+          </Link>
+        </div>
+
+        {recommendationsQuery.isPending ? (
+          <ProductGridSkeleton count={4} />
+        ) : recommendationsQuery.isError ? (
+          <ErrorState
+            error={recommendationsQuery.error}
+            onRetry={() => void recommendationsQuery.refetch()}
+          />
+        ) : recommendationsQuery.data.items.length === 0 ? (
+          <EmptyState
+            icon={<Store className="size-6" />}
+            title="No recommendations yet"
+            description="Available products will appear here as local shops add them."
+          />
+        ) : (
+          <ProductGrid>
+            {recommendationsQuery.data.items.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </ProductGrid>
+        )}
+      </section>
     </div>
   );
 }
@@ -219,7 +301,9 @@ function CategoryChip({
       aria-pressed={active}
       className={cn(
         'shrink-0 rounded-full border px-3 py-1 text-sm font-medium transition-colors',
-        active ? 'border-ink-950 bg-ink-950 text-white' : 'border-ink-200 bg-white text-ink-700 hover:border-ink-400',
+        active
+          ? 'border-ink-950 bg-ink-950 text-white'
+          : 'border-ink-200 bg-white text-ink-700 hover:border-ink-400',
       )}
     >
       {children}
